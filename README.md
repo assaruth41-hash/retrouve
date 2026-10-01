@@ -1,6 +1,6 @@
 # Retrouve
 
-Site web de récupération d'objets perdus. Une personne qui trouve un objet le publie avec une photo, le lieu et son numéro. Le propriétaire le retrouve dans la liste et échange avec elle grâce à un chat en direct.
+Site web de récupération d'objets perdus. Une personne qui trouve un objet le publie avec une photo, le lieu . Le propriétaire le retrouve dans la liste et échange avec elle grâce à un chat en direct.
 
 **Site en ligne :** https://assaruth41-hash.github.io/retrouve
 

@@ -1,1 +1,200 @@
+<!DOCTYPE html><html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Retrouvé – objets perdus et trouvés</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;800&family=Figtree:wght@400;600&display=swap">
+<style>
+:root{--ink:#0f2a43;--paper:#f3f5f7;
+--text:#12212f;--sun:#f5d547;--sky:#8fd3ff;--pink:#ff8fb1;--muted:#5b6b7a;
+color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--ink);color:#fff;font:400 16px/1.5 Figtree,system-ui,sans-serif}
+#scene{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+main{position:relative;z-index:1}
+h1,h2,h3{font-family:'Bricolage Grotesque',Georgia,serif;margin:0;line-height:1.02}
+.hero{min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:24px 20px 40px;max-width:760px}
+.hero h1{font-weight:800;font-size:clamp(3rem,13vw,7rem);letter-spacing:-.03em}
+.hero p{font-size:1.1rem;max-width:30ch;margin:16px 0 24px;color:#d6e6f5}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:0;border-radius:999px;padding:14px 22px;font:600 1rem Figtree,sans-serif;cursor:pointer;background:var(--sun);color:var(--ink);text-decoration:none}
+.btn.alt{background:transparent;color:#fff;box-shadow:inset 0 0 0 2px #ffffff88}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.sheet{background:var(--paper);color:var(--text);border-radius:28px 28px 0 0;padding:32px 20px 48px;min-height:60vh}
+.wrap{max-width:900px;margin:0 auto}
+.sheet h2{font-size:clamp(1.8rem,6vw,2.6rem);margin-bottom:6px}
+.sub{color:var(--muted);margin:0 0 22px}
+.declare{background:#fff;border-radius:20px;padding:20px;margin-bottom:40px;box-shadow:0 0 0 1px #12212f14}
+label{display:block;font-weight:600;margin:14px 0 6px}
+input,textarea{width:100%;font:inherit;padding:12px 14px;border-radius:12px;border:1.5px solid #c5d0da;background:#fff;color:var(--text)}
+.photo{display:flex;align-items:center;gap:14px}
+.photo img{width:72px;height:72px;object-fit:cover;border-radius:14px;background:#e4ebf1}
+.declare .btn{margin-top:20px;background:var(--ink);color:#fff}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.card{background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 0 0 1px #12212f14;display:flex;flex-direction:column}
+.thumb{aspect-ratio:4/3;background:var(--c,#8fd3ff);display:grid;place-items:center;font:800 3.5rem 'Bricolage Grotesque',serif;color:#0f2a4399}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.card div.b{padding:14px 16px 16px;display:flex;flex-direction:column;gap:4px;flex:1}
+.card h3{font-size:1.25rem}
+.card small{color:var(--muted)}
+.card .btn{margin-top:auto;background:var(--ink);color:#fff;padding:11px 16px}
+.empty{color:var(--muted)}
+dialog{border:0;border-radius:24px;padding:0;width:min(440px,94vw);background:var(--paper);color:var(--text)}
+dialog::backdrop{background:#0f2a43cc}
+.ch{padding:16px 18px;background:var(--ink);color:#fff}
+.ch b{font:800 1.2rem 'Bricolage Grotesque',serif}
+.msgs{height:40vh;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:8px}
+.m{max-width:80%;padding:10px 14px;border-radius:16px;background:#fff}
+.m.me{align-self:flex-end;background:var(--sky)}
+.send{display:flex;gap:8px;padding:12px}
+.note{font-size:.85rem;color:var(--muted);padding:0 16px 14px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<canvas id="scene" aria-hidden="true"></canvas>
+<main>
+<section class="hero">
+  <h1>Tout ce qui se perd se retrouve.</h1>
+  <p>Tu as trouvé un objet ? Publie-le. Tu en as perdu un ? Cherche-le et parle à celui qui l'a.</p>
+  <div class="row"><a class="btn" href="#declarer">J'ai trouvé un objet</a><a class="btn alt" href="#liste">J'ai perdu un objet</a></div>
+</section>
+<section class="sheet">
+<div class="wrap">
+  <div class="declare" id="declarer">
+    <h2>Publier un objet trouvé</h2>
+    <p class="sub">Une photo, un lieu, ton numéro. Le reste se fait par message.</p>
+    <label for="nom">Objet</label><input id="nom" placeholder="Clés avec porte-clé bleu">
+    <label for="lieu">Lieu où tu l'as trouvé</label><input id="lieu" placeholder="Bibliothèque, 2e étage">
+    <label for="tel">Ton numéro</label><input id="tel" type="tel" placeholder="06 12 34 56 78">
+    <label for="photo">Photo</label>
+    <div class="photo"><img id="prev" alt=""><input id="photo" type="file" accept="image/*" capture="environment"></div>
+    <button class="btn" id="pub">Publier l'objet</button>
+  </div>
+  <h2 id="liste">Objets trouvés</h2>
+  <p class="sub">Clique sur « C'est à moi » pour écrire à la personne qui l'a trouvé.</p>
+  <div class="grid" id="grid"></div>
+</div>
+</section>
+</main>
+<dialog id="chat">
+  <div class="ch"><b id="ct"></b><div id="cs" style="opacity:.8;font-size:.9rem"></div></div>
+  <div class="msgs" id="msgs"></div>
+  <div class="send"><input id="mi" placeholder="Décris l'objet pour prouver qu'il est à toi"><button class="btn" id="ms">Envoyer</button></div>
+  <div class="note">Les messages sont partagés en direct. <button class="btn alt" style="color:var(--text);box-shadow:inset 0 0 0 2px #12212f33;padding:6px 12px;font-size:.85rem" id="cc">Fermer</button></div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ---------- Supabase ----------
+const SB=supabase.createClient('https://pmnjmzaobfaugbplusxq.supabase.co','sb_publishable_FBUQUxduHH50YMqfSr3jEQ_pWdUegTp');
+const COLORS=['#8fd3ff','#f5d547','#ff8fb1','#b9f0c8'];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let items=[],photoBlob=null,me='u'+Math.random().toString(36).slice(2,10);
+try{me=localStorage.getItem('retrouve:me')||me;localStorage.setItem('retrouve:me',me)}catch(e){}
+function render(){
+  $('grid').innerHTML=items.length?items.map(o=>`<article class="card"><div class="thumb" style="--c:${COLORS[o.id%4]}">${o.photo_url?`<img src="${esc(o.photo_url)}" alt="${esc(o.nom)}">`:esc(o.nom[0]||'?')}</div><div class="b"><h3>${esc(o.nom)}</h3><small>Trouvé : ${esc(o.lieu)}</small><button class="btn" data-id="${o.id}">C'est à moi</button></div></article>`).join(''):'<p class="empty">Aucun objet pour le moment. Sois le premier à en publier un.</p>';
+}
+async function load(){
+  const {data,error}=await SB.from('objets').select('*').order('created_at',{ascending:false});
+  if(error){$('grid').innerHTML='<p class="empty">Impossible de charger les objets. Vérifie ta connexion et recharge la page.</p>';return}
+  items=data;render();
+}
+load();
+// ---------- Photo ----------
+$('photo').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const im=new Image();im.onload=()=>{
+    const s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');
+    c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+    c.toBlob(b=>{photoBlob=b;$('prev').src=URL.createObjectURL(b)},'image/jpeg',.8)};
+  im.src=URL.createObjectURL(f);
+};
+$('pub').onclick=async()=>{
+  const nom=$('nom').value.trim(),lieu=$('lieu').value.trim(),tel=$('tel').value.trim();
+  if(!nom||!lieu||!tel){alert("Remplis l'objet, le lieu et ton numéro.");return}
+  const btn=$('pub');btn.disabled=true;btn.textContent='Publication...';
+  let photo_url=null;
+  if(photoBlob){
+    const path=Date.now()+'-'+Math.random().toString(36).slice(2,6)+'.jpg';
+    const up=await SB.storage.from('photos').upload(path,photoBlob,{contentType:'image/jpeg'});
+    if(up.error){alert("La photo n'a pas pu être envoyée. Réessaie.");btn.disabled=false;btn.textContent="Publier l'objet";return}
+    photo_url=SB.storage.from('photos').getPublicUrl(path).data.publicUrl;
+  }
+  const {error}=await SB.from('objets').insert({nom,lieu,tel,photo_url});
+  btn.disabled=false;btn.textContent="Publier l'objet";
+  if(error){alert("Publication impossible. Réessaie.");return}
+  photoBlob=null;$('prev').removeAttribute('src');
+  ['nom','lieu','tel','photo'].forEach(i=>$(i).value='');
+  await load();$('liste').scrollIntoView();
+};
+// ---------- Chat en direct ----------
+let cur=null,msgs=[],chan=null;
+function drawMsgs(){
+  $('msgs').innerHTML=msgs.length?msgs.map(m=>`<div class="m${m.auteur===me?' me':''}">${esc(m.contenu)}</div>`).join(''):'<div class="m">Écris un message à la personne qui a trouvé cet objet.</div>';
+  $('msgs').scrollTop=1e5;
+}
+function addMsg(m){if(!msgs.some(x=>x.id===m.id)){msgs.push(m);drawMsgs()}}
+$('grid').onclick=async e=>{
+  const b=e.target.closest('button[data-id]');if(!b)return;
+  cur=items.find(o=>o.id==b.dataset.id);
+  $('ct').textContent=cur.nom;$('cs').textContent='Trouvé par '+cur.tel+' · '+cur.lieu;
+  msgs=[];drawMsgs();$('chat').showModal();
+  const {data}=await SB.from('messages').select('*').eq('objet_id',cur.id).order('created_at');
+  (data||[]).forEach(addMsg);
+  chan=SB.channel('objet-'+cur.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'objet_id=eq.'+cur.id},p=>addMsg(p.new)).subscribe();
+};
+$('ms').onclick=async()=>{
+  const v=$('mi').value.trim();if(!v||!cur)return;$('mi').value='';
+  const {data,error}=await SB.from('messages').insert({objet_id:cur.id,auteur:me,contenu:v}).select().single();
+  if(error){alert("Message non envoyé. Réessaie.");$('mi').value=v;return}
+  addMsg(data);
+};
+$('chat').addEventListener('close',()=>{if(chan){SB.removeChannel(chan);chan=null}});
+$('cc').onclick=()=>$('chat').close();
+// ---------- Scène 3D ----------
+const cv=$('scene'),R=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));
+const S=new THREE.Scene(),cam=new THREE.PerspectiveCamera(45,1,.1,100);cam.position.z=9;
+S.add(new THREE.HemisphereLight(0xffffff,0x0f2a43,1.1));
+const dl=new THREE.DirectionalLight(0xffffff,1.2);dl.position.set(4,6,5);S.add(dl);
+const mat=c=>new THREE.MeshStandardMaterial({color:c,roughness:.35,metalness:.15});
+const grp=[];
+function add(g,x,y,z,s){g.position.set(x,y,z);g.scale.setScalar(s);g.userData={x,y,r:Math.random()*6,v:.15+Math.random()*.25};S.add(g);grp.push(g)}
+// Clé
+let k=new THREE.Group(),ring=new THREE.Mesh(new THREE.TorusGeometry(.6,.2,16,40),mat(0xf5d547));
+let sh=new THREE.Mesh(new THREE.BoxGeometry(1.8,.22,.22),mat(0xf5d547));sh.position.x=1.3;
+let t1=new THREE.Mesh(new THREE.BoxGeometry(.22,.5,.2),mat(0xf5d547));t1.position.set(1.8,-.3,0);
+k.add(ring,sh,t1);add(k,-2.2,1.6,0,.8);
+// Téléphone
+let ph=new THREE.Group();ph.add(new THREE.Mesh(new THREE.BoxGeometry(1,2,.14),mat(0xff8fb1)));
+let sc=new THREE.Mesh(new THREE.BoxGeometry(.86,1.8,.02),mat(0x0f2a43));sc.position.z=.08;ph.add(sc);add(ph,2.4,1.2,-1,.9);
+// Lunettes
+let gl=new THREE.Group();[-.7,.7].forEach(x=>{let r=new THREE.Mesh(new THREE.TorusGeometry(.55,.08,12,36),mat(0x8fd3ff));r.position.x=x;gl.add(r)});
+gl.add(new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.4,8),mat(0x8fd3ff)));gl.children[2].rotation.z=Math.PI/2;add(gl,-1.8,-1.6,-.5,.9);
+// Sac
+let bg=new THREE.Group();bg.add(new THREE.Mesh(new THREE.BoxGeometry(1.4,1.8,.8),mat(0xb9f0c8)));
+let ha=new THREE.Mesh(new THREE.TorusGeometry(.4,.07,10,24,Math.PI),mat(0xf3f5f7));ha.position.y=.9;bg.add(ha);add(bg,2.3,-1.9,0,.9);
+// Balle
+add(new THREE.Mesh(new THREE.SphereGeometry(.6,32,24),mat(0xf3f5f7)),.2,2.6,-2,.9);
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+let mx=0,my=0;addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
+function size(){R.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;
+  const narrow=cam.aspect<.8;grp.forEach(g=>g.userData.k=narrow?.55:1);cam.updateProjectionMatrix()}
+addEventListener('resize',size);size();
+const clock=new THREE.Clock();
+(function loop(){
+  const t=reduce?0:clock.getElapsedTime();
+  grp.forEach(g=>{const u=g.userData;
+    g.rotation.y=u.r+t*u.v;g.rotation.x=Math.sin(t*u.v+u.r)*.4;
+    g.position.set(u.x*u.k,u.y+Math.sin(t*.6+u.r)*.25,g.position.z)});
+  cam.position.x+=(mx*1.2-cam.position.x)*.05;cam.position.y+=(-my*.8-cam.position.y)*.05;cam.lookAt(0,0,0);
+  R.render(S,cam);requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
 
